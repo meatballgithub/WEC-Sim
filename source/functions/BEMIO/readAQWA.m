@@ -72,6 +72,7 @@ for i=1:hydro(F).Nb
     hydro(F).dof(i)     = 6;  % Default degrees of freedom for each body is 6
 end
 %%
+% wave heading 相关数据   tmp这一行包含了数量  频率个数  方向
 hydro(F).Nh     = tmp(2);  % Number of wave headings
 hydro(F).Nf     = tmp(3);  % Number of wave frequencies
 hydro(F).theta   = [];
@@ -79,10 +80,13 @@ for i = 1:ceil(hydro(F).Nh/6)
     hydro(F).theta   = [hydro(F).theta str2num(raw1{n})]; % Wave headings
     n               = n+1;
 end
+% tmp前三位是 id waveheading个数,有限元仿真频率点，去掉前三个，后面几个就是waveheading角度
 hydro(F).theta(1:3) = [];
+% 初始化附加质量/阻尼矩阵，避免在读取附加质量/阻尼时把另一个矩阵清零
 hydro.A = zeros(hydro.Nb*6,hydro.Nb*6,hydro.Nf); 
 hydro.B = zeros(hydro.Nb*6,hydro.Nb*6,hydro.Nf);
 %%
+% 读取bem仿真的离散频率点并计算对应周期
 hydro(F).w = [];
 for i=1:ceil(hydro(F).Nf/6)
     hydro(F).w = [hydro(F).w str2num(raw1{n})]; % Wave frequencies
@@ -93,6 +97,7 @@ hydro(F).T = 2*pi./hydro(F).w;
 for ln = n:length(raw1)
     if isempty(strfind(raw1{ln},'GENERAL'))==0
         if V182 == 1  % General information columns in Versions>18.2
+            % general下数据分别是  水深  密度  重力加速度
             tmp = str2num(raw1{ln+1});
             hydro(F).h      = tmp(2);   % Water depth
             hydro(F).rho    = tmp(3);   % Water density
@@ -106,12 +111,14 @@ for ln = n:length(raw1)
         clear V182
     end
     if isempty(strfind(raw1{ln},'COG'))==0
+        % COG代表重心数据
         for i=1:hydro(F).Nb
             tmp = str2num(raw1{ln+i});
             hydro(F).cg(:,i) = tmp(2:4); % Center of gravity
         end
     end
     if isempty(strfind(raw1{ln},'DRAFT'))==0
+        % DRAFT代表吃水数据
         for i=1:hydro(F).Nb
             tmp = str2num(raw1{ln+i});
             draft(i) = tmp(2); % Draft
@@ -120,6 +127,7 @@ for ln = n:length(raw1)
     if (isempty(strfind(raw1{ln},'HYDSTIFFNESS'))==0 |...
             (isempty(strfind(raw1{ln},'MASS'))==0 & isempty(strfind(raw1{ln},'ADDEDMASS'))==1))
         if isempty(strfind(raw1{ln},'HYDSTIFFNESS'))==0 f = 0; else f = 1; end
+        % 读取浮力系数矩阵
         for j=1:hydro(F).Nb
             for i=1:6
                 tmp = str2num(raw1{ln+(j-1)*6+i});
@@ -132,6 +140,7 @@ for ln = n:length(raw1)
             end
         end
     end 
+    % 读取  附加质量  附加阻尼矩阵
     if ((isempty(strfind(raw1{ln},'ADDEDMASS'))==0) && isempty(strfind(raw1{ln},'LF'))==1 && isempty(strfind(raw1{ln},'HF'))==1) || ...
             (isempty(strfind(raw1{ln},'DAMPING'))==0 && isempty(strfind(raw1{ln},'LF'))==1)
         flag = 0;
@@ -189,10 +198,12 @@ for ln=1:length(raw2)
     if isempty(find(ln==lnlog,1))==0
         continue
     elseif isempty(strfind(raw2{ln},'MESH BASED DISPLACEMENT'))==0
+        % MESH BASED DISPLACEMENT是排水体积
         tmp = textscan(raw2{ln}(find(raw2{ln}=='=')+1:end),'%f');
         hydro(F).Vo = [hydro(F).Vo tmp{1}];   % Volume
     
     elseif isempty(strfind(raw2{ln},'POSITION OF THE CENTRE OF BUOYANCY'))==0
+        % POSITION OF THE CENTRE OF BUOYANCY是浮心
         cb = [];
         for i=1:3
             tmp = textscan(raw2{(ln-1)+i}(find(raw2{(ln-1)+i}=='=')+1:end),'%f');
