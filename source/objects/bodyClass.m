@@ -500,6 +500,12 @@ classdef bodyClass<handle
                 obj.b2bDOF = zeros(6,1);
             end
         end
+
+        function modifyHydroForce(obj,re,im)
+            obj.hydroForce.fExt.re=re;
+            obj.hydroForce.fExt.im=im;
+        end
+
     end
     
     methods (Access = 'protected') %modify object = T; output = F
