@@ -51,13 +51,19 @@ t = linspace(-tEnd,tEnd,nDt);
 w = linspace(wMin,wMax,nDw);  
 N = sum(hydro.dof)*hydro.Nh;
 
+hydro.ex_K=zeros(sum(hydro.dof), hydro.Nh, length(t));
+
 % Calculate the impulse response function for excitation
 n = 0;
-for i = 1:sum(hydro.dof)
+for i = 1:sum(hydro.dof)    
     for j = 1:hydro.Nh
-        ex_re = interp1(hydro.w,squeeze(hydro.ex_re(i,j,:)),w);
-        ex_im = interp1(hydro.w,squeeze(hydro.ex_im(i,j,:)),w);
-        hydro.ex_K(i,j,:) = (1/pi)*trapz(w,ex_re.*cos(w.*t(:))-ex_im.*sin(w.*t(:)),2);
+        if sum(squeeze(hydro.ex_ma(i,j,:)),'all')~=0
+            ex_re = interp1(hydro.w,squeeze(hydro.ex_re(i,j,:)),w);
+            ex_im = interp1(hydro.w,squeeze(hydro.ex_im(i,j,:)),w);
+            hydro.ex_K(i,j,:) = (1/pi)*trapz(w,ex_re.*cos(w.*t(:))-ex_im.*sin(w.*t(:)),2);
+        else
+            hydro.ex_K(i,j,:)=0;
+        end
         n = n+1;
     end
     waitbar(n/N)

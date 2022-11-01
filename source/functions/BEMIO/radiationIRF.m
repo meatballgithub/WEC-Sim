@@ -55,11 +55,13 @@ N = sum(hydro.dof) * sum(hydro.dof);
 
 % Calculate the impulse response function for radiation
 n = 0;
-hydro.ra_K = nan(sum(hydro.dof), sum(hydro.dof), length(t));
+hydro.ra_K = zeros(sum(hydro.dof), sum(hydro.dof), length(t));
 for i = 1:sum(hydro.dof)
     for j = 1:sum(hydro.dof)
-        ra_B = interp1(hydro.w,squeeze(hydro.B(i,j,:)),w);
-        hydro.ra_K(i,j,:) = (2/pi)*trapz(w,ra_B.*(cos(w.*t(:)).*w), 2);
+        if sum(squeeze(hydro.B(i,j,:))) ~= 0
+            ra_B = interp1(hydro.w,squeeze(hydro.B(i,j,:)),w);
+            hydro.ra_K(i,j,:) = (2/pi)*trapz(w,ra_B.*(cos(w.*t(:)).*w), 2);
+        end
         n = n+1;
     end
     waitbar(n/N)

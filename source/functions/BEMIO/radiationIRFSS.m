@@ -47,13 +47,15 @@ for i=1:sum(hydro.dof)
         
         K = squeeze(hydro.ra_K(i,j,:));
         R2i = norm(K-mean(K));  % Initial R2
-        
-        %Hankel Singular Value Decomposition
-        O = 2;  % Initial state space order
-        y = dt*K;
-        h = hankel(y(2:end));
-        [u,svh,v] = svd(h);
-        svh=diag(svh);
+
+        if R2i~=0        
+            %Hankel Singular Value Decomposition
+            O = 2;  % Initial state space order
+            y = dt*K;
+            h = hankel(y(2:end));
+            [u,svh,v] = svd(h);
+            svh=diag(svh);
+        end
         
         while R2i ~= 0.0
             u1 = u(1:length(K)-2,1:O);
