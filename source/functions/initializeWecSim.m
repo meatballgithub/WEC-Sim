@@ -170,7 +170,11 @@ for ii = 1:simu.numHydroBodies
         end
         clearvars h5Info        
         % Read hydro data from BEMIO and load into the bodyClass
-        tmp_hydroData = readBEMIOH5(body(ii).h5File, body(ii).number, body(ii).meanDrift);
+        if exist('hydroData','var')
+            tmp_hydroData=hydroData(ii);
+        else
+            tmp_hydroData = readBEMIOH5(body(ii).h5File, body(ii).number, body(ii).meanDrift);
+        end        
         body(ii).loadHydroData(tmp_hydroData);
         clear tmp_hydroData
     end

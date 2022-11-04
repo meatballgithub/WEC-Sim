@@ -96,7 +96,7 @@ classdef bodyClass<handle
     end
     
     methods (Access = 'public') % modify object = T; output = F
-        function obj = bodyClass(h5File)
+        function obj = bodyClass()
             % This method initilizes the ``bodyClass`` and creates a
             % ``body`` object.
             %
@@ -110,11 +110,11 @@ classdef bodyClass<handle
             %     body : obj
             %         bodyClass object
             %
-            if exist('h5File','var')
-                obj.h5File = h5File;
-            else
-                error('The body class number(s) in the wecSimInputFile must be specified in ascending order starting from 1. The bodyClass() function should be called first to initialize each body with an h5 file.')
-            end
+%             if exist('h5File','var')
+%                 obj.h5File = h5File;
+%             else
+%                 error('The body class number(s) in the wecSimInputFile must be specified in ascending order starting from 1. The bodyClass() function should be called first to initialize each body with an h5 file.')
+%             end
         end
         
         function checkInputs(obj,explorer)

@@ -57,10 +57,14 @@ N = sum(hydro.dof) * sum(hydro.dof);
 n = 0;
 hydro.ra_K = zeros(sum(hydro.dof), sum(hydro.dof), length(t));
 for i = 1:sum(hydro.dof)
-    for j = 1:sum(hydro.dof)
+    for j = i:sum(hydro.dof)
         if sum(squeeze(hydro.B(i,j,:))) ~= 0
             ra_B = interp1(hydro.w,squeeze(hydro.B(i,j,:)),w);
             hydro.ra_K(i,j,:) = (2/pi)*trapz(w,ra_B.*(cos(w.*t(:)).*w), 2);
+            % 利用对称性减少计算量
+            if (i~=j)
+                hydro.ra_K(j,i,:) = hydro.ra_K(i,j,:);
+            end
         end
         n = n+1;
     end

@@ -43,7 +43,7 @@ hydro.ss_R2 = zeros(sum(hydro.dof),sum(hydro.dof));
 hydro.ss_O = zeros(sum(hydro.dof),sum(hydro.dof));
 
 for i=1:sum(hydro.dof)
-    for j=1:sum(hydro.dof)
+    for j=i:sum(hydro.dof)
         
         K = squeeze(hydro.ra_K(i,j,:));
         R2i = norm(K-mean(K));  % Initial R2
@@ -74,6 +74,7 @@ for i=1:sum(hydro.dof)
             bc = dt*(iidd*b);             % (T/2+T/2)*2/T(I+A)^{-1}B = 2(I+A)^{-1}B
             cc = c*iidd;                  % C*2/T(I+A)^{-1} = 2/T(I+A)^{-1}
             dc = d-dt/2*((c*iidd)*b);     % D-T/2C (2/T(I+A)^{-1})B = D-C(I+A)^{-1})B
+            ss_K=t;
             for k=1:length(t)
                 ss_K(k) = ((cc*expm(ac*dt*(k-1)))*bc);  % Calc SS IRF approx
             end
@@ -93,6 +94,19 @@ for i=1:sum(hydro.dof)
             hydro.ss_R2(i,j) = R2;
             hydro.ss_O(i,j) = O;
         end
+        
+        % 利用对称性减少计算量
+        if (i~=j)
+            hydro.ss_A(j,i,1:O,1:O) = hydro.ss_A(i,j,1:O,1:O);
+            hydro.ss_B(j,i,1:O,1) = hydro.ss_B(i,j,1:O,1);
+            hydro.ss_C(j,i,1,1:O) = hydro.ss_C(i,j,1,1:O);
+            hydro.ss_D(j,i) = hydro.ss_D(i,j);
+            hydro.ss_K(j,i,:) = hydro.ss_K(i,j,:) ;
+            hydro.ss_conv(j,i) = hydro.ss_conv(i,j) ;
+            hydro.ss_R2(j,i) = hydro.ss_R2(i,j);
+            hydro.ss_O(j,i) = hydro.ss_O(i,j);
+        end
+
     end
     waitbar(i/(sum(hydro.dof)))
 end
