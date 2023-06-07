@@ -162,19 +162,19 @@ for ii = 1:simu.numHydroBodies
     if exist('totalNumOfWorkers','var') ==0 && exist('mcr','var') == 1 && simu.reloadH5Data == 0 && imcr > 1
         body(ii).loadHydroData(hydroData(ii));
     else
-        % check for correct h5 file
-        h5Info = dir(body(ii).h5File);
-        h5Info.bytes;
-        if h5Info.bytes < 1000
-            error(['This is not the correct *.h5 file. Please install git-lfs to access the correct *.h5 file, or run \hydroData\bemio.m to generate a new *.h5 file'])
-        end
-        clearvars h5Info        
-        % Read hydro data from BEMIO and load into the bodyClass
         if exist('hydroData','var')
             tmp_hydroData=hydroData(ii);
         else
+            % check for correct h5 file
+            h5Info = dir(body(ii).h5File);
+            h5Info.bytes;
+            if h5Info.bytes < 1000
+                error(['This is not the correct *.h5 file. Please install git-lfs to access the correct *.h5 file, or run \hydroData\bemio.m to generate a new *.h5 file'])
+            end
+            clearvars h5Info
+            % Read hydro data from BEMIO and load into the bodyClass
             tmp_hydroData = readBEMIOH5(body(ii).h5File, body(ii).number, body(ii).meanDrift);
-        end        
+        end
         body(ii).loadHydroData(tmp_hydroData);
         clear tmp_hydroData
     end

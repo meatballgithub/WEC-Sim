@@ -121,9 +121,9 @@ classdef bodyClass<handle
             % This method checks WEC-Sim user inputs for each body and generates error messages if parameters are not properly defined for the bodyClass.
             
             % Check h5 file
-            if exist(obj.h5File,'file')==0 && obj.nonHydro==0
-                error('The hdf5 file %s does not exist',obj.h5File)
-            end
+%             if exist(obj.h5File,'file')==0 && obj.nonHydro==0
+%                 error('The hdf5 file %s does not exist',obj.h5File)
+%             end
             % Check definitions
             if (~isnumeric(obj.mass) && ~strcmp(obj.mass, 'equilibrium') && ~strcmp(obj.mass, 'fixed')) || isempty(obj.mass)
                 error('Body mass needs to be defined numerically, set to ''equilibrium'', or set to ''fixed''.')
