@@ -380,7 +380,7 @@ classdef bodyClass<handle
                 obj.hydroForce.fExt.re = fExt_tmp.re .* c - fExt_tmp.im .* s;
                 obj.hydroForce.fExt.im = fExt_tmp.re .* s + fExt_tmp.im .* c;
             else
-                for ii = 1:body(idx).dof
+                for ii = 1:obj.dof
                     obj.hydroForce.fExt.re(:, :, ii) = fExt_tmp.re(:, :, ii) .* c - fExt_tmp.im(:, :, ii) .* s;
                     obj.hydroForce.fExt.im(:, :, ii) = fExt_tmp.re(:, :, ii) .* s + fExt_tmp.im(:, :, ii) .* c;
                 end
