@@ -299,10 +299,11 @@ classdef bodyClass<handle
             obj.dof = length(obj.quadDrag.drag);
         end
         
-        function hydroForcePre(obj,w,direction,cicTime,bemCount,dt,rho,g,waveType,waveAmpTime,stateSpace,B2B)
+        function hydroForcePre(obj,w,direction,wavenumber,cicTime,bemCount,dt,rho,g,waveType,waveAmpTime,stateSpace,B2B)
             % HydroForce Pre-processing calculations
             % 1. Set the linear hydrodynamic restoring coefficient, viscous drag, and linear damping matrices
             % 2. Set the wave excitation force
+            % 3. Correct the phase of excitation force caused by the body not being located at the coordinate origin
             obj.setMassMatrix(rho)
             if (obj.gbmDOF>0)
                 % obj.linearDamping = [obj.linearDamping zeros(1,obj.dof-length(obj.linearDamping))];
@@ -369,6 +370,24 @@ classdef bodyClass<handle
                 obj.flex = 1;
                 obj.nonHydro=0;
             end
+
+            % phase of excitation force correction
+            theta = direction * pi / 180;
+            dphi = -wavenumber * (obj.centerGravity(1) * cos(theta) + obj.centerGravity(2) * sin(theta));
+            c = cos(dphi)'; s = sin(dphi)';
+            fExt_tmp = obj.hydroForce.fExt;
+            if length(w)==1
+                obj.hydroForce.fExt.re = fExt_tmp.re .* c - fExt_tmp.im .* s;
+                obj.hydroForce.fExt.im = fExt_tmp.re .* s + fExt_tmp.im .* c;
+            else
+                for ii = 1:body(idx).dof
+                    obj.hydroForce.fExt.re(:, :, ii) = fExt_tmp.re(:, :, ii) .* c - fExt_tmp.im(:, :, ii) .* s;
+                    obj.hydroForce.fExt.im(:, :, ii) = fExt_tmp.re(:, :, ii) .* s + fExt_tmp.im(:, :, ii) .* c;
+                end
+            end
+
+
+
         end
         
         function adjustMassMatrix(obj,B2B)
@@ -572,12 +591,6 @@ classdef bodyClass<handle
                 obj.b2bDOF = 6;
             end
         end
-
-        function modifyHydroForce(obj,re,im)
-            obj.hydroForce.fExt.re=re;
-            obj.hydroForce.fExt.im=im;
-        end
-
     end
     
     methods (Access = 'protected') %modify object = T; output = F
