@@ -80,7 +80,7 @@ classdef bodyClass<handle
         hydroData           = struct()                      % (`structure`) Defines the hydrodynamic data from BEM or user defined.
     end
 
-    properties (SetAccess = 'private', GetAccess = 'public')% internal
+    properties (SetAccess = 'protected', GetAccess = 'public')% internal
         b2bDOF              = []                            % (`matrix`) Matrices length, Options: ``6`` without body-to-body interactions. ``6*number of hydro bodies`` with body-to-body interactions.
         hydroForce          = struct()                      % (`structure`) Defines hydrodynamic forces and coefficients used during simulation.
         massCalcMethod      = []                            % (`string`) Method used to obtain mass, options: ``'user'``, ``'equilibrium'``
@@ -100,7 +100,7 @@ classdef bodyClass<handle
     end
     
     methods (Access = 'public') % modify object = T; output = F
-        function obj = bodyClass()
+        function obj = bodyClass(h5File)
             % This method initilizes the ``bodyClass`` and creates a
             % ``body`` object.
             %
@@ -114,11 +114,12 @@ classdef bodyClass<handle
             %     body : obj
             %         bodyClass object
             %
-%             if exist('h5File','var')
-%                 obj.h5File = h5File;
-%             else
-%                 error('The body class number(s) in the wecSimInputFile must be specified in ascending order starting from 1. The bodyClass() function should be called first to initialize each body with an h5 file.')
-%             end
+            if exist('h5File','var')
+                obj.h5File = h5File;
+            else
+                error('The body class number(s) in the wecSimInputFile must be specified in ascending order starting from 1. The bodyClass() function should be called first to initialize each body with an h5 file.')
+            end
+
         end
         
         function checkInputs(obj,explorer)
@@ -166,12 +167,11 @@ classdef bodyClass<handle
             mustBeMember(obj.paraview,[0 1])
 
             % Check h5 file
-%             if exist(obj.h5File,'file')==0 && obj.nonHydro==0
-%                 error('The hdf5 file %s does not exist',obj.h5File)
-%             end
-            % Check definitions
-            if (~isnumeric(obj.mass) && ~strcmp(obj.mass, 'equilibrium') && ~strcmp(obj.mass, 'fixed')) || isempty(obj.mass)
-                error('Body mass needs to be defined numerically, set to ''equilibrium'', or set to ''fixed''.')
+            if exist(obj.h5File,'file')==0 && obj.nonHydro==0
+                error('The hdf5 file %s does not exist',obj.h5File)
+            end
+            if ~strcmp(obj.mass,'equilibrium') && ~isscalar(obj.mass)
+                error('Body mass must be defined as a scalar or set to `equilibrium`')
             end
             if isempty(obj.inertia)
                 error('Body moment of inertia needs to be defined for all bodies.')
@@ -299,11 +299,10 @@ classdef bodyClass<handle
             obj.dof = length(obj.quadDrag.drag);
         end
         
-        function hydroForcePre(obj,w,direction,wavenumber,cicTime,bemCount,dt,rho,g,waveType,waveAmpTime,stateSpace,B2B)
+        function hydroForcePre(obj,w,direction,cicTime,bemCount,dt,rho,g,waveType,waveAmpTime,stateSpace,B2B)
             % HydroForce Pre-processing calculations
             % 1. Set the linear hydrodynamic restoring coefficient, viscous drag, and linear damping matrices
             % 2. Set the wave excitation force
-            % 3. Correct the phase of excitation force caused by the body not being located at the coordinate origin
             obj.setMassMatrix(rho)
             if (obj.gbmDOF>0)
                 % obj.linearDamping = [obj.linearDamping zeros(1,obj.dof-length(obj.linearDamping))];
@@ -370,24 +369,6 @@ classdef bodyClass<handle
                 obj.flex = 1;
                 obj.nonHydro=0;
             end
-
-            % phase of excitation force correction
-            theta = direction * pi / 180;
-            dphi = -wavenumber * (obj.centerGravity(1) * cos(theta) + obj.centerGravity(2) * sin(theta));
-            c = cos(dphi)'; s = sin(dphi)';
-            fExt_tmp = obj.hydroForce.fExt;
-            if length(w)==1
-                obj.hydroForce.fExt.re = fExt_tmp.re .* c - fExt_tmp.im .* s;
-                obj.hydroForce.fExt.im = fExt_tmp.re .* s + fExt_tmp.im .* c;
-            else
-                for ii = 1:obj.dof
-                    obj.hydroForce.fExt.re(:, :, ii) = fExt_tmp.re(:, :, ii) .* c - fExt_tmp.im(:, :, ii) .* s;
-                    obj.hydroForce.fExt.im(:, :, ii) = fExt_tmp.re(:, :, ii) .* s + fExt_tmp.im(:, :, ii) .* c;
-                end
-            end
-
-
-
         end
         
         function adjustMassMatrix(obj,B2B)

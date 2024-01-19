@@ -59,7 +59,7 @@ if exist('runWecSimCML','var') && runWecSimCML==1
     % wecSim input from wecSimInputFile.m of case directory in the standard manner
     fprintf('\nWEC-Sim Input From Standard wecSimInputFile.m Of Case Directory... \n');
     bdclose('all');
-%     run('wecSimInputFile');
+    run('wecSimInputFile');
 else
     % Get global reference frame parameters
     values = get_param([bdroot,'/Global Reference Frame'],'MaskValues');    % Cell array containing all Masked Parameter values
@@ -285,8 +285,8 @@ idx = find(hydroBodLogic==1);
 if ~isempty(idx)
     for kk = 1:length(idx)
         it = idx(kk);
-        body(it).hydroForcePre(waves(1).omega,waves(1).direction,waves(1).wavenumber,simu.cicTime,waves(1).bem.count,simu.dt,...
-            simu.rho,simu.gravity,waves(1).type,waves(1).waveAmpTime,simu.stateSpace,simu.b2b);
+        body(it).hydroForcePre(waves(1).omega,waves(1).direction,simu.cicTime,waves(1).bem.count,simu.dt,...
+            simu.rho,simu.gravity,waves(1).type,waves(1).waveAmpTime,simu.stateSpace,simu.b2b,waves(1).direction);
     end; clear kk idx
 end
 
