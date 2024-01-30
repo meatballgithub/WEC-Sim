@@ -286,7 +286,7 @@ if ~isempty(idx)
     for kk = 1:length(idx)
         it = idx(kk);
         body(it).hydroForcePre(waves(1).omega,waves(1).direction,simu.cicTime,waves(1).bem.count,simu.dt,...
-            simu.rho,simu.gravity,waves(1).type,waves(1).waveAmpTime,simu.stateSpace,simu.b2b,waves(1).direction);
+            simu.rho,simu.gravity,waves(1).type,waves(1).waveAmpTime,simu.stateSpace,simu.b2b,waves(1).wavenumber);
     end; clear kk idx
 end
 
