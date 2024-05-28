@@ -173,15 +173,11 @@ for ln = n:length(raw1)
                     tmp1 = str2num(raw1{ln+(k-1)*hydro(F).Nh*hydro(F).Nf*2+(j-1)*hydro(F).Nf*2+(i-1)*2+1});
                     tmp2 = str2num(raw1{ln+(k-1)*hydro(F).Nh*hydro(F).Nf*2+(j-1)*hydro(F).Nf*2+(i-1)*2+2});
                     ind = tmp1(1:3); tmp1(1:3)=[];
-                    hydro(F).ex_ma(((ind(1)-1)*6+1):(ind(1)*6),ind(2),ind(3)) = tmp1; % Magnitude of exciting force
-<<<<<<< HEAD
+                    hydro(F).ex_ma(((ind(1) - 1) * 6 + 1):(ind(1) * 6), ind(2), ind(3)) = tmp1; % Magnitude of exciting force
                     hydro(F).ex_ph(((ind(1)-1)*6+1):(ind(1)*6),ind(2),ind(3)) = wrapToPi(-tmp2*pi/180); % Phase of exciting force    
                     % 常规定义为 fe=K*A*cos(w*t+phi);即相位为正时,表示激励力超前的相位值
                     % aqwa定义   fe=K*A*cos(w*t-phi);即相位为负时,表示激励力超前的相位值
                     % 固相位取负以匹配常规定义，wec-sim源码有误,修改
-=======
-                    
->>>>>>> upstream/master
                 end
             end
         end
