@@ -74,7 +74,7 @@ classdef bodyClass<handle
             'threshold',                            1)                      % (`structure`) Defines the passive yaw mplementation. ``option`` (`integer`) Flag for passive yaw calculation, Options: 0 (off), 1 (on). Default = ``0``. ``threshold`` (`float`) Yaw position threshold (in degrees) above which excitation coefficients will be interpolated in passive yaw. Default = ``1`` [deg].        
     end
     
-    properties (SetAccess = 'private', GetAccess = 'public')% h5 file
+    properties (SetAccess = 'protected', GetAccess = 'public') % h5 file
         dofEnd              = []                            % (`integer`) Index the DOF ends for (``body.number``). For WEC bodies this is given in the h5 file, but if not defined in the h5 file, Default = ``(body.number-1)*6+6``.
         dofStart            = []                            % (`integer`) Index the DOF starts for (``body.number``). For WEC bodies this is given in the h5 file, but if not defined in the h5 file, Default = ``(body.number-1)*6+1``.
         hydroData           = struct()                      % (`structure`) Defines the hydrodynamic data from BEM or user defined.
